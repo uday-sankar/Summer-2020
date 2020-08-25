@@ -1,5 +1,5 @@
 # Summer-2020
-The Shrodinger equation solving problem
+The Schrodinger equation solving problem
 The files with extension .jl are julia files
 and those with .py extension are python files
     SHO-> Simple Harmonic oscilator
