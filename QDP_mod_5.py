@@ -1,9 +1,14 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+from math import exp
 import sys
 import time
-#approximate time needed for running = 11min
+
+
+
+# In[2]:
+
 
 def Poten(x):
     if C_4!=0:
@@ -12,10 +17,13 @@ def Poten(x):
         C_0=C0
     V=K*(C_4*(x**4)-C_2*(x**2)+C_0)
     return V
-
 def F(x,E):
     v=Poten(x)
     return 2*m*(v-E)/h**2
+
+
+# In[3]:
+
 
 def Numrov(x,q0,q1,psi1,f1,dx,E):
     q2=(dx**2)*f1*psi1+2*q1-q0
@@ -23,7 +31,11 @@ def Numrov(x,q0,q1,psi1,f1,dx,E):
     psi2=q2/(1-f2*dx**2)
     return q2,f2,psi2
 
-def initials(E=3/2,Xmin=-5,Xmax=5,psi_0=1e-30,psi_1=1e-29,div=int(1e5)):
+
+# In[17]:
+
+
+def initials(E=3/2,Xmin=-5,Xmax=5,psi_0=10**(-30),psi_1=10**(-29),div=10**4):
     '''
     Xmin,Xmax=minimum and maximum of the range
     div denotes the number of divisions for X
@@ -39,8 +51,35 @@ def initials(E=3/2,Xmin=-5,Xmax=5,psi_0=1e-30,psi_1=1e-29,div=int(1e5)):
     q=[q_0,q_1]
     return X,psi,f,q,dx
 
+
+# In[26]:
+
+
+def initialsBk(eps=1,Xmin=-5,Xmax=5,psi_0=1e-30,psi_1=1e-30,div=10**4):
+    '''
+    Xmin,Xmax=minimum and maximum of the range
+    div denotes the number of divisions for X
+    '''
+    X=np.linspace(Xmin,Xmax,div)
+    X=X[::-1]
+    dx=X[1]-X[0]
+    f_0=(X[0]**2-eps)
+    f_1=(X[1]**2-eps)
+    q_0=psi_0*(1-dx**2*f_0/12)
+    q_1=psi_1*(1-dx**2*f_1/12)
+    psi=[psi_0,psi_1]
+    f=[f_0,f_1]
+    q=[q_0,q_1]
+    return X,psi,f,q,dx
+
+
+# In[5]:
+
+
 def run_eq(X,q,f,psi,dx,E):
+    #print(eps)
     for i in range(len(X)-2):
+# q2,f2,psi2=Numrov(X[i+1],q[-2],q[-1],psi[-1],f[-1],dx,eps)
         x=X[i+1]
         f1=f[-1]
         psi1=psi[-1]
@@ -53,6 +92,10 @@ def run_eq(X,q,f,psi,dx,E):
     psi_n=Normalize(X,psi)
     return X,psi_n
 
+
+# In[6]:
+
+
 def run_mult(range_eps,Ra):
     data=[]
     i=0
@@ -62,9 +105,13 @@ def run_mult(range_eps,Ra):
         data.append([X,n_psi])
         if len(range_eps)>50:
             sys.stdout.flush()
-            sys.stdout.write("\r{0}>>".format('#'*int((i+1)*20/len(range_eps))))
+            sys.stdout.write("\r{0}>".format('#'*(i+1)))
         i+=1
     return data
+
+
+# In[7]:
+
 
 def Eg_optim(E_init,num_prec,peak=[-1,1],Ra=[-5,5],div=.1):
     '''
@@ -79,6 +126,7 @@ def Eg_optim(E_init,num_prec,peak=[-1,1],Ra=[-5,5],div=.1):
     higer the num_prec more accurate the eigen energy is 
     higer the bum_prec more time it takes to compute
     '''
+    print('\n')
     Dyn_E=E_init#We consider 2 values of E near to this Dynamic E
     dE=div#stores the range in which we check for an optimum(the values are:-> E-dE,E,E+dE)
     Dummy_data=run_mult([Dyn_E],Ra)#X is same for all
@@ -88,7 +136,7 @@ def Eg_optim(E_init,num_prec,peak=[-1,1],Ra=[-5,5],div=.1):
     imin=np.where((x>x_0) & (x<(x_0+.1)))[0][0]# getting the range of indices near the peak region
     imax=np.where((x>x_l)&(x<(x_l+.1)))[0][0]#here our range is the peak range given
     opt_count=0#denotes the number of precision accuired, initialized to be zero
-    print(f'\n\tInput value for optimization:{E_init}')
+    print(f'Input value for optimization:{E_init}')
     #A loop is run until the needed optimization is achived 
     i=0
     while opt_count<=num_prec:
@@ -108,13 +156,16 @@ def Eg_optim(E_init,num_prec,peak=[-1,1],Ra=[-5,5],div=.1):
             dE=dE/10.0
             opt_count+=1
         sys.stdout.flush()
-        sys.stdout.write("\r{0}".format(f"\t \tEnergy Value after {1+i} optimizations:->{Dyn_E}"))
+        sys.stdout.write("\r{0}".format(f"\tEnergy Value after {1+i} optimizations:->{Dyn_E}"))
         i+=1
     if Dyn_E<0:
-        print('\nOptimization failed')
+        print('Optimization failed')
     else:
-        print(f'\n\tValue  after optimization =>{Dyn_E}')
+        print(f'\nValue  after optimization =>{Dyn_E}')
         return Dyn_E
+
+
+# In[8]:
 
 
 def Explo_ary(E_array,peak_ind,Ra=[-5,5]):#function which will return the explotion array
@@ -139,7 +190,7 @@ def Explo_ary(E_array,peak_ind,Ra=[-5,5]):#function which will return the explot
             Xplo_e.append([exp_f,E_array[j]])
     Explo=np.copy(Explo)
     if lg<4:#in case there are only 3 values we need the minimum finding the local minimum is only fruitful when we have at least 6 values
-        ind=np.where(Explo==Explo.min())[0][0]# this section code is exclusievely used by Eg_optim function
+        ind=np.where(Explo==Explo.min())[0][0]
         optim_eng=[E_array[ind]]
     else:# in this case we find the local minimums
         for i in range(lg-2):
@@ -149,58 +200,63 @@ def Explo_ary(E_array,peak_ind,Ra=[-5,5]):#function which will return the explot
     return optim_eng
 
 
+# In[9]:
+
 
 def Energy_finder(E_est,num_prec=5,peak=[-1,1],Ra=[-5,5],div=.1):
-	'''
-	Returns the maximum possible accurate value of eigen energy based on the 
-	prececuion given
-	'''
-	E_eigen=[]
-	E_array=np.linspace(E_est-div,E_est+div,20)# an array with .01 differences
-	dE=div#stores the range in which we check for an optimum(the values are:-> E-dE,E,E+dE)
-	Dummy_data=run_mult([E_array[0]],Ra)#X is same for all
-	x=Dummy_data[0][0]
-	x_0=peak[0]
-	x_l=peak[1]
-	imin=np.where((x>x_0) & (x<(x_0+div)))[0][0]# getting the range of indices near the peak region
-	imax=np.where((x>x_l)&(x<(x_l+div)))[0][0]#here our range is the peak range given
-	Eg_ar=[]
-	E_est=round(E_est,2)
-	print(f"\nSuspected eigen energy value lies between {E_est-div}-->{E_est+div}")
-	for i in range(num_prec):
-		print(f'\tEnergy search range after {i+1} runs {E_array[0]}->{E_array[-1]}')
-		Eg_ar=Explo_ary(E_array,[imin,imax],Ra)
-		dE=dE/10
-		if len(Eg_ar)>1:
-			for e in Eg_ar:
-				E_eigen.append(Eg_optim(e,(num_prec-i-1),peak,Ra,dE))
-			print('\n')
-			return E_eigen
-		else:
-			E_est=Eg_ar[0]
-			E_array=np.linspace(E_est-1*dE,E_est+1*dE,20)
-	return Eg_ar
+    '''
+    Returns the maximum possible accurate value of eigen energy based on the 
+    prececuion given
+    '''
+    E_eigen=[]
+    E_array=np.linspace(E_est-div,E_est+div,20)# an array with .01 differences
+    dE=div#stores the range in which we check for an optimum(the values are:-> E-dE,E,E+dE)
+    Dummy_data=run_mult([E_array[0]],Ra)#X is same for all
+    x=Dummy_data[0][0]
+    x_0=peak[0]
+    x_l=peak[1]
+    imin=np.where((x>x_0) & (x<(x_0+div)))[0][0]# getting the range of indices near the peak region
+    imax=np.where((x>x_l)&(x<(x_l+div)))[0][0]#here our range is the peak range given
+    Eg_ar=[]
+    E_est=round(E_est,2)
+    print(f"\nSuspected eigen energy value lies between {E_est-div}-->{E_est+div}\n")
+    for i in range(num_prec):
+        #print(E_array[0],'\t',E_est,'\t',E_array[-1],'\t',dE)
+        Eg_ar=Explo_ary(E_array,[imin,imax],Ra)
+        dE=dE/10
+        if len(Eg_ar)>1:
+            for e in Eg_ar:
+                E_eigen.append(Eg_optim(e,(num_prec-i-1),peak,Ra,dE))
+                #E=np.copy(E_eigen)
+            return E_eigen#E.flatten()
+        else:
+            E_est=Eg_ar[0]
+            E_array=np.linspace(E_est-1*dE,E_est+1*dE,20)
+        sys.stdout.flush()
+        sys.stdout.write("\r{0}".format(f'\tEnergy search range {E_array[0]}->{E_array[-1]}'))
+    return Eg_ar
+
+
+# In[10]:
 
 
 def Energy_loc(E_range,peak_r,X_range=[-5,5],div=.1):
-	E_r=np.arange(E_range[0],E_range[1],div)
-	d=run_mult(E_r,X_range)
-	X=d[0][0]
-	x_0=peak_r[0]
-	x_l=peak_r[1]
-	Eigen_E=[]#array to store eigen energies
-	#n=len(E_r)#number of energy values we are considering
-	imin=np.where((X>x_0) & (X<(x_0+.1)))[0][0]# getting the range of indices near the peak region
-	imax=np.where((X>x_l)&(X<(x_l+.1)))[0][0]#here our range is the peak range given
-	Eng=Explo_ary(E_r,[imin,imax])
-	i=0
-	num=len(Eng)
-	for E in Eng:
-		com=round((i+1)*100/(num+.1),2)
-		print(f'\t{com}% done')         
-		Eigen_E.append(Energy_finder(E,5,peak_r,X_range))
-		i=i+1
-	return Eigen_E
+    E_r=np.arange(E_range[0],E_range[1],div)
+    d=run_mult(E_r,X_range)
+    X=d[0][0]
+    x_0=peak_r[0]
+    x_l=peak_r[1]
+    Eigen_E=[]#array to store eigen energies
+    n=len(E_r)#number of energy values we are considering
+    imin=np.where((X>x_0) & (X<(x_0+.1)))[0][0]# getting the range of indices near the peak region
+    imax=np.where((X>x_l)&(X<(x_l+.1)))[0][0]#here our range is the peak range given
+    Eng=Explo_ary(E_r,[imin,imax])
+    for E in Eng:         
+        Eigen_E.append(Energy_finder(E,5,peak_r,X_range))
+    return Eigen_E
+
+
+# In[11]:
 
 
 def Normalize(x,y,norml_Val=1):#function to normalize the function
@@ -209,16 +265,68 @@ def Normalize(x,y,norml_Val=1):#function to normalize the function
     for i in range(len(x)-1):
         a=abs((x[i+1]-x[i])*(y[i]+y[i+1])/2)
         A=A+a
-        norm_y=y/A
+    for i in range(len(x)):
+        norm_y.append(y[i]/A)
     return norm_y
 
-def plot_mult(Epsrange):
-    pl=run_mult(Epsrange)
-    i=0
-    for eps in Epsrange:
-        plt.plot(pl[i][0],pl[i][1],label=eps)
-        i+=1
-#changing w,h,m can shift the peaks from their currrent position and the program might fail
+
+# In[13]:
+
+
+def Merger(X,psi,X_b,psi_b):
+    '''
+    Given the both forward and backward solution this function merges both of them together.
+    An explotion near the end of the forward. othewise this tep is not needed 
+    X_b starts from 10 till -10(towards negatieve direction)
+    '''
+    psi_b=np.copy(psi_b[::-1])
+    psi_m=np.copy(psi)# the final merged psi 
+    last_min=0#stores the postion of last minimum in the psi array this indicates the minimum before the explotion
+    for p in range(len(psi)-2):
+        if abs(psi_m[p])>abs(psi_m[p+1]):  
+            if abs(psi_m[p+1])<abs(psi_m[p+2]):
+                last_min=p+1   
+    psi_m[last_min:]=psi_b[last_min:]#merging both of them
+    psi_n=Normalize(X,psi_m)
+    return psi_n
+
+
+
+
+
+def Run_both(eps=1,Xmin=-10,Xmax=10,psi_0=1e-30,psi_1=1e-30,div=10**5):
+    '''
+    This function splirts the x axis into two and runs two function one from negative till x=0
+    another from positive.
+    xmin has to be a negatieve number and Xmax a positieve number, othewise this step donot work
+    This gives a functiojn which satisfies boundary condition irrespective of the eigen value
+    So FOR SOLVING EIGEN VALUES THIS FUNCTION SHOULD NOT BE USED
+    '''
+    X,psi,f,q,dx=initials(eps,Xmin,Xmax,psi_0,psi_1,div)
+    X_b,psi_b,f_b,q_b,dx=initialsBk(eps,Xmin,Xmax,psi_0,psi_1,div)
+    run_eq(X,q,f,psi,dx,eps)
+    run_eq(X_b,q_b,f_b,psi_b,dx,eps)
+    N_psi=Merger(X,psi,X_b,psi_b)
+    return X,N_psi
+    
+
+
+
+
+
+def Plot_Eq(E_range,Xmin=-10,Xmax=10):
+    """
+    Recieves the energies for which we need the plots. 
+    And the range of x axis to be covered
+    plots the respective plots after running using the
+    Run_both function
+    """
+   
+    for e in E_range:
+        x,Psi=Run_both(e,Xmin,Xmax)
+        ax.plot(x,Psi+e,label=e)
+    ax.plot(X,Poten(X),label='Potential function (V)')
+
 h=1
 m=1
 w=1
@@ -227,26 +335,34 @@ C_4=4
 C_2=40
 C0=10
 K=1/10
-exp_max_r=[-2.5,-1.5]# the range where we expect to find a probability peak
+exp_max_r=[-2.5,-1.5]# the range between which we are more likely yo find a probability peak
 
 Xplo_e=[]
 b=time.time()
 E=Energy_loc([0,10],exp_max_r)
 TT=time.time()-b
-print('\nTime taken for calculation of 6 eigen energies=',TT)
+print('\n Time taken for computing eigen values= ',TT)
+
+
+# In[40]:
+
 
 Eigen_Eg=[]
-for e in E:# to make the energy array single dimensional
+i=1
+for e in E:
     for erg in e:
         Eigen_Eg.append(erg)
-Eigen_Eg
-plot_mult(Eigen_Eg)
-X=np.linspace(-5,5,10**5)#D[0][0]
-plt.plot(X,Poten(X))
+        print(f"Eigen energy {i}={erg}")
+        i+=1
+
+
+# In[51]:
+
+
+X=np.linspace(-10,10,10**3)
+fig=plt.figure()
+ax=plt.axes(xlabel='x',ylabel='Psi',xlim=(-10,10),ylim=(-0,12))
+ax.legend()
+ax.set_title("Solutions of Schrodinger equations \n for Quantum Double Potential Well")
+Plot_Eq(Eigen_Eg,-10,10)
 plt.show()
-
-
-
-
-
-
