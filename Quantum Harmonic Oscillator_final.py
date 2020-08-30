@@ -1,44 +1,30 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
+'''
+Created by: Uday Sankar Manoj
+            Student SCS NISER,Bhubaneswar,India 
+'''
 
 import matplotlib.pyplot as plt
 import numpy as np
 from math import exp
 
-
-
-# In[2]:
-
-
 def F(u,e):#using the equation ddpsi=(u^2-epsilon)*psi
     return u**2-e
-
-
-# In[3]:
-
 
 def Numrov(x,q0,q1,psi1,f1,dx,eps):# function implementing numerov's algorith
     q2=(dx**2)*f1*psi1+2*q1-q0
     f2=F(x,eps)
     psi2=q2/(1-f2*dx**2/12)
     return q2,f2,psi2
+
 def Numrov2(x,q2,q1,psi1,f1,dx,eps):# function implementing numerov's algorith
     q2=(dx**2)*f1*psi1+2*q1-q0
     f2=F(x,eps)
     psi2=q2/(1-f2*dx**2/12)
     return q2,f2,psi2
 
-
-# In[4]:
-
-
 def run_eq(X,q,f,psi,eps):#function to find all the psi values
     #print(eps)
     for i in range(len(X)-2):
-# q2,f2,psi2=Numrov(X[i+1],q[-2],q[-1],psi[-1],f[-1],dx,eps)
         x=X[i+1]
         f1=f[-1]
         psi1=psi[-1]
@@ -50,10 +36,6 @@ def run_eq(X,q,f,psi,eps):#function to find all the psi values
         f.append(f2)
         psi.append(psi2)
 
-
-# In[5]:
-
-
 def run_mult(range_eps):
     data=[]
     for eps in range_eps:
@@ -61,9 +43,6 @@ def run_mult(range_eps):
         run_eq(X,q,f,psi,eps)
         data.append([X,psi])
     return data
-
-
-# In[6]:
 
 
 def initials(eps=1,Xmin=-5,Xmax=5,psi_0=1e-30,psi_1=1e-30,div=10**4):
@@ -81,6 +60,7 @@ def initials(eps=1,Xmin=-5,Xmax=5,psi_0=1e-30,psi_1=1e-30,div=10**4):
     f=[f_0,f_1]
     q=[q_0,q_1]
     return X,psi,f,q
+
 def initialsBk(eps=1,Xmin=-5,Xmax=5,psi_0=1e-30,psi_1=1e-30,div=10**5):
     '''
     Xmin,Xmax=minimum and maximum of the range
@@ -97,10 +77,6 @@ def initialsBk(eps=1,Xmin=-5,Xmax=5,psi_0=1e-30,psi_1=1e-30,div=10**5):
     f=[f_0,f_1]
     q=[q_0,q_1]
     return X,psi,f,q
-
-
-# In[7]:
-
 
 def Eigen_finder2(eps_init,num_steps,div=.1):
     '''
@@ -145,10 +121,6 @@ def Eigen_finder2(eps_init,num_steps,div=.1):
                 div=div/2
     return eps_init
 
-
-# In[8]:
-
-
 def Eigen_Helper(min_e,max_e,int_gap):
     '''
     In this method we divide an interval and get many points in between the interval.
@@ -170,10 +142,6 @@ def Eigen_Helper(min_e,max_e,int_gap):
         print("Correct eigen value after optimizing->",eps)
     return Eps
 
-
-# In[9]:
-
-
 def Normalize(x,y,norml_Val=1):#function to normalize the function
     '''
     UDX->uniformly descretized x axis
@@ -187,10 +155,6 @@ def Normalize(x,y,norml_Val=1):#function to normalize the function
         A=A+a
     norm_y=y/A
     return norm_y
-
-
-# In[10]:
-
 
 def Run_both(eps=1,Xmin=-10,Xmax=10,psi_0=1e-30,psi_1=1e-30,div=10**4):
     '''
@@ -206,12 +170,7 @@ def Run_both(eps=1,Xmin=-10,Xmax=10,psi_0=1e-30,psi_1=1e-30,div=10**4):
     run_eq(X_b,q_b,f_b,psi_b,eps)
     N_psi=Merger(X,psi,X_b,psi_b)
     return X,N_psi
-    
-
-
-# In[11]:
-
-
+   
 def Merger(X,psi,X_b,psi_b):
     '''
     Given the both forward and backward solution this function merges both of them together.
@@ -229,10 +188,6 @@ def Merger(X,psi,X_b,psi_b):
     psi_n=Normalize(X,psi_m)
     return psi_n
 
-
-# In[12]:
-
-
 def Plot_Eq(E_range,Xmin=-10,Xmax=10):
     print(E_range)
     for e in E_range:
@@ -241,15 +196,9 @@ def Plot_Eq(E_range,Xmin=-10,Xmax=10):
         print(e)
         ax.plot(x,Psi+e,label=e)
 
-
-# In[13]:
-
-
 int_gap=10
 EPS=Eigen_Helper(1,10,int_gap)
 
-
-# In[14]:
 X=np.linspace(-10,10,10**3)
 fig=plt.figure()
 ax=plt.axes(ylim=(0,12))
@@ -258,9 +207,6 @@ ax.plot(X,F(X,0))
 Plot_Eq(EPS)
 ax.legend()
 plt.show()
-
-# In[19]:
-
 
 h=6.63e-34
 w=1
